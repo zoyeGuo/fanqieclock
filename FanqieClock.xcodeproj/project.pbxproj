@@ -16,6 +16,9 @@
 		001000000000000000000007 /* FloatingWidgetRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 002000000000000000000007 /* FloatingWidgetRootView.swift */; };
 		001000000000000000000008 /* SettingsWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 002000000000000000000008 /* SettingsWindowController.swift */; };
 		001000000000000000000009 /* TimerStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 002000000000000000000009 /* TimerStore.swift */; };
+		00100000000000000000000A /* TodoistClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00200000000000000000000C /* TodoistClient.swift */; };
+		00100000000000000000000B /* TodayTasksStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00200000000000000000000D /* TodayTasksStore.swift */; };
+		00100000000000000000000C /* TodayTasksWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00200000000000000000000E /* TodayTasksWindowController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,6 +33,9 @@
 		002000000000000000000009 /* TimerStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerStore.swift; sourceTree = "<group>"; };
 		00200000000000000000000A /* FanqieClock.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FanqieClock.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		00200000000000000000000B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		00200000000000000000000C /* TodoistClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoistClient.swift; sourceTree = "<group>"; };
+		00200000000000000000000D /* TodayTasksStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayTasksStore.swift; sourceTree = "<group>"; };
+		00200000000000000000000E /* TodayTasksWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayTasksWindowController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -88,6 +94,9 @@
 				002000000000000000000007 /* FloatingWidgetRootView.swift */,
 				002000000000000000000008 /* SettingsWindowController.swift */,
 				002000000000000000000009 /* TimerStore.swift */,
+				00200000000000000000000C /* TodoistClient.swift */,
+				00200000000000000000000D /* TodayTasksStore.swift */,
+				00200000000000000000000E /* TodayTasksWindowController.swift */,
 			);
 			path = fanqie;
 			sourceTree = "<group>";
@@ -157,6 +166,9 @@
 				001000000000000000000007 /* FloatingWidgetRootView.swift in Sources */,
 				001000000000000000000008 /* SettingsWindowController.swift in Sources */,
 				001000000000000000000009 /* TimerStore.swift in Sources */,
+				00100000000000000000000A /* TodoistClient.swift in Sources */,
+				00100000000000000000000B /* TodayTasksStore.swift in Sources */,
+				00100000000000000000000C /* TodayTasksWindowController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

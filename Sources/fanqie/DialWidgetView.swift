@@ -12,10 +12,20 @@ struct DialWidgetView: View {
 
             ZStack {
                 Circle()
-                    .fill(.black.opacity(0.28))
-                    .frame(width: metrics.minSide * 0.86, height: metrics.minSide * 0.86)
-                    .blur(radius: 26)
-                    .offset(y: 16)
+                    .fill(
+                        RadialGradient(
+                            colors: [
+                                .black.opacity(0.18),
+                                .black.opacity(0.08),
+                                .clear
+                            ],
+                            center: .center,
+                            startRadius: 8,
+                            endRadius: metrics.minSide * 0.31
+                        )
+                    )
+                    .frame(width: metrics.minSide * 0.72, height: metrics.minSide * 0.72)
+                    .offset(y: 12)
 
                 dialFace(metrics: metrics)
             }
@@ -101,6 +111,209 @@ struct DialWidgetView: View {
                     timerStore.togglePrimaryAction()
                 }
             }
+    }
+}
+
+enum BubbleTailEdge: Equatable {
+    case top
+    case bottom
+}
+
+struct TaskBubbleView: View {
+    let task: TodoistTask
+    let tailEdge: BubbleTailEdge
+    let isCompleting: Bool
+    let onComplete: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            if tailEdge == .top {
+                BubbleTail()
+                    .fill(Color.white.opacity(0.10))
+                    .overlay(
+                        BubbleTail()
+                            .fill(
+                                LinearGradient(
+                                    colors: [
+                                        .white.opacity(0.18),
+                                        .white.opacity(0.06)
+                                    ],
+                                    startPoint: .top,
+                                    endPoint: .bottom
+                                )
+                            )
+                    )
+                    .overlay(
+                        BubbleTail()
+                            .stroke(.white.opacity(0.16), lineWidth: 0.9)
+                    )
+                    .frame(width: 14, height: 9)
+                    .rotationEffect(.degrees(180))
+                    .offset(x: 18, y: 1)
+                    .zIndex(1)
+            }
+
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(alignment: .center, spacing: 6) {
+                    Circle()
+                        .fill(
+                            LinearGradient(
+                                colors: [
+                                    Color(red: 0.70, green: 0.93, blue: 1.0),
+                                    Color(red: 0.42, green: 0.84, blue: 1.0)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .frame(width: 7, height: 7)
+                        .shadow(color: .cyan.opacity(0.45), radius: 6)
+
+                    Text("今日第一件")
+                        .font(.system(size: 10, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.68))
+
+                    Spacer(minLength: 0)
+
+                    if let dueText = task.compactDueSummary {
+                        Text(dueText)
+                            .font(.system(size: 8, weight: .bold, design: .rounded))
+                            .foregroundStyle(.white.opacity(0.52))
+                    }
+                }
+
+                HStack(alignment: .top, spacing: 9) {
+                    Button(action: onComplete) {
+                        ZStack {
+                            Circle()
+                                .fill(Color.white.opacity(0.10))
+                                .frame(width: 22, height: 22)
+
+                            Circle()
+                                .strokeBorder(.white.opacity(0.22), lineWidth: 1)
+                                .frame(width: 22, height: 22)
+
+                            if isCompleting {
+                                ProgressView()
+                                    .controlSize(.small)
+                                    .tint(.green)
+                            } else {
+                                Image(systemName: "checkmark")
+                                    .font(.system(size: 10, weight: .heavy))
+                                    .foregroundStyle(.green.opacity(0.88))
+                            }
+                        }
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(isCompleting)
+                    .padding(.top, 1)
+
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(task.content)
+                            .font(.system(size: 11, weight: .bold, design: .rounded))
+                            .foregroundStyle(.white.opacity(0.92))
+                            .lineLimit(2)
+                            .fixedSize(horizontal: false, vertical: true)
+
+                        Text(isCompleting ? "正在同步完成…" : "点击圆圈完成")
+                            .font(.system(size: 9, weight: .medium, design: .rounded))
+                            .foregroundStyle(.white.opacity(0.46))
+                    }
+                }
+            }
+            .padding(.horizontal, 12)
+            .padding(.top, 10)
+            .padding(.bottom, 10)
+            .background(
+                ZStack {
+                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        .fill(Color.white.opacity(0.09))
+
+                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        .fill(
+                            LinearGradient(
+                                colors: [
+                                    .white.opacity(0.22),
+                                    .white.opacity(0.08),
+                                    .white.opacity(0.03)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+
+                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        .fill(
+                            LinearGradient(
+                                colors: [
+                                    Color(red: 0.08, green: 0.12, blue: 0.17).opacity(0.22),
+                                    Color(red: 0.05, green: 0.07, blue: 0.10).opacity(0.10)
+                                ],
+                                startPoint: .bottomLeading,
+                                endPoint: .topTrailing
+                            )
+                        )
+
+                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        .strokeBorder(.white.opacity(0.18), lineWidth: 0.9)
+
+                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        .strokeBorder(Color.cyan.opacity(0.10), lineWidth: 2)
+                        .blur(radius: 6)
+                }
+                .overlay(alignment: .topLeading) {
+                    Capsule(style: .continuous)
+                        .fill(.white.opacity(0.18))
+                        .frame(width: 42, height: 4)
+                        .blur(radius: 3)
+                        .offset(x: 14, y: 8)
+                }
+            )
+
+            if tailEdge == .bottom {
+                BubbleTail()
+                    .fill(Color.white.opacity(0.10))
+                    .overlay(
+                        BubbleTail()
+                            .fill(
+                                LinearGradient(
+                                    colors: [
+                                        .white.opacity(0.18),
+                                        .white.opacity(0.06)
+                                    ],
+                                    startPoint: .top,
+                                    endPoint: .bottom
+                                )
+                            )
+                    )
+                    .overlay(
+                        BubbleTail()
+                            .stroke(.white.opacity(0.16), lineWidth: 0.9)
+                    )
+                    .frame(width: 14, height: 9)
+                    .offset(x: 16, y: -1)
+            }
+        }
+        .shadow(color: .white.opacity(0.05), radius: 12)
+        .shadow(color: .black.opacity(0.16), radius: 18, y: 10)
+        .opacity(isCompleting ? 0.88 : 1.0)
+    }
+}
+
+private struct BubbleTail: Shape {
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        path.move(to: CGPoint(x: rect.minX, y: rect.minY))
+        path.addQuadCurve(
+            to: CGPoint(x: rect.midX, y: rect.maxY),
+            control: CGPoint(x: rect.minX + rect.width * 0.12, y: rect.maxY * 0.72)
+        )
+        path.addQuadCurve(
+            to: CGPoint(x: rect.maxX, y: rect.minY + rect.height * 0.18),
+            control: CGPoint(x: rect.maxX - rect.width * 0.10, y: rect.maxY * 0.56)
+        )
+        path.closeSubpath()
+        return path
     }
 }
 

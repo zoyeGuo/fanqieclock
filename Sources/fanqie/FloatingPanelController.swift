@@ -7,6 +7,50 @@ final class FloatingPanel: NSPanel {
     override var canBecomeMain: Bool { false }
 }
 
+private final class TransparentHostingView<Content: View>: NSHostingView<Content> {
+    override var isOpaque: Bool { false }
+
+    required init(rootView: Content) {
+        super.init(rootView: rootView)
+        wantsLayer = true
+        layer?.backgroundColor = NSColor.clear.cgColor
+        layer?.isOpaque = false
+        layer?.masksToBounds = false
+    }
+
+    @available(*, unavailable)
+    required init(rootView: Content, sizingOptions: NSHostingSizingOptions) {
+        fatalError("init(rootView:sizingOptions:) has not been implemented")
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+}
+
+private final class TransparentContainerView: NSView {
+    override var isOpaque: Bool { false }
+
+    override init(frame frameRect: NSRect) {
+        super.init(frame: frameRect)
+        wantsLayer = true
+        layer?.backgroundColor = NSColor.clear.cgColor
+        layer?.isOpaque = false
+        layer?.masksToBounds = false
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    override func draw(_ dirtyRect: NSRect) {
+        NSColor.clear.setFill()
+        dirtyRect.fill()
+    }
+}
+
 private final class EdgePeekPanel: NSPanel {
     override var canBecomeKey: Bool { false }
     override var canBecomeMain: Bool { false }
@@ -95,20 +139,24 @@ final class FloatingPanelController: NSWindowController {
 
     init(
         timerStore: TimerStore,
+        todayTasksStore: TodayTasksStore,
         settings: AppSettings,
         onTestReminder: @escaping () -> Void,
+        onOpenTasks: @escaping () -> Void,
         onOpenSettings: @escaping () -> Void
     ) {
         self.settings = settings
         let rootView = FloatingWidgetRootView(
             timerStore: timerStore,
             settings: settings,
+            todayTasksStore: todayTasksStore,
             onTestReminder: onTestReminder,
+            onOpenTasks: onOpenTasks,
             onOpenSettings: onOpenSettings,
             onHoverChanged: { _ in },
             onWindowDragFinished: { _ in }
         )
-        let hostingView = NSHostingView(rootView: rootView)
+        let hostingView = TransparentHostingView(rootView: rootView)
         let initialSize = WidgetLayout.panelSize(
             scale: settings.widgetScale,
             showDragHandle: settings.showDragHandle
@@ -134,14 +182,17 @@ final class FloatingPanelController: NSWindowController {
         panel.standardWindowButton(.closeButton)?.isHidden = true
         panel.standardWindowButton(.miniaturizeButton)?.isHidden = true
         panel.standardWindowButton(.zoomButton)?.isHidden = true
-        panel.contentView = hostingView
+        let contentContainer = Self.makeTransparentContainer(size: initialSize, child: hostingView)
+        panel.contentView = contentContainer
 
         super.init(window: panel)
 
         hostingView.rootView = FloatingWidgetRootView(
             timerStore: timerStore,
             settings: settings,
+            todayTasksStore: todayTasksStore,
             onTestReminder: onTestReminder,
+            onOpenTasks: onOpenTasks,
             onOpenSettings: onOpenSettings,
             onHoverChanged: { [weak self] isHovering in
                 self?.handlePanelHoverChanged(isHovering)
@@ -397,7 +448,7 @@ final class FloatingPanelController: NSWindowController {
     }
 
     private func makePeekContentView(for side: DockSide) -> NSView {
-        NSHostingView(
+        let hostingView = TransparentHostingView(
             rootView: EdgePeekTabView(
                 side: side,
                 onHoverChanged: { [weak self] isHovering in
@@ -408,6 +459,15 @@ final class FloatingPanelController: NSWindowController {
                 }
             )
         )
+        return Self.makeTransparentContainer(size: peekPanelSize, child: hostingView)
+    }
+
+    private static func makeTransparentContainer(size: CGSize, child: NSView) -> NSView {
+        let container = TransparentContainerView(frame: NSRect(origin: .zero, size: size))
+        child.frame = container.bounds
+        child.autoresizingMask = [.width, .height]
+        container.addSubview(child)
+        return container
     }
 
     private func layoutPeekPanel(for side: DockSide, on screen: NSScreen, referenceFrame: NSRect) {

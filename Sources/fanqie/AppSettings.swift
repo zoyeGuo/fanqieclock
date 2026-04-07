@@ -10,6 +10,7 @@ final class AppSettings: ObservableObject {
         static let enableStrongReminder = "settings.enableStrongReminder"
         static let playReminderSound = "settings.playReminderSound"
         static let showDragHandle = "settings.showDragHandle"
+        static let todoistTaskOrder = "settings.todoistTaskOrder"
     }
 
     private let defaults: UserDefaults
@@ -54,6 +55,12 @@ final class AppSettings: ObservableObject {
         }
     }
 
+    @Published private(set) var todoistTaskOrder: [String] {
+        didSet {
+            defaults.set(todoistTaskOrder, forKey: Keys.todoistTaskOrder)
+        }
+    }
+
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
         self.defaultFocusMinutes = defaults.object(forKey: Keys.defaultFocusMinutes) as? Int ?? 15
@@ -61,6 +68,7 @@ final class AppSettings: ObservableObject {
         self.enableStrongReminder = defaults.object(forKey: Keys.enableStrongReminder) as? Bool ?? true
         self.playReminderSound = defaults.object(forKey: Keys.playReminderSound) as? Bool ?? true
         self.showDragHandle = defaults.object(forKey: Keys.showDragHandle) as? Bool ?? true
+        self.todoistTaskOrder = defaults.stringArray(forKey: Keys.todoistTaskOrder) ?? []
     }
 
     func resetToDefaults() {
@@ -69,5 +77,9 @@ final class AppSettings: ObservableObject {
         enableStrongReminder = true
         playReminderSound = true
         showDragHandle = true
+    }
+
+    func setTodoistTaskOrder(_ order: [String]) {
+        todoistTaskOrder = order
     }
 }

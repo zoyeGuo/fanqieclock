@@ -5,15 +5,20 @@ import SwiftUI
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private let settings = AppSettings.shared
     private lazy var timerStore = TimerStore(settings: settings)
+    private let todayTasksStore = TodayTasksStore.shared
     private var floatingPanelController: FloatingPanelController?
     private var completionOverlayController: CompletionOverlayController?
     private var settingsWindowController: SettingsWindowController?
+    private var todayTasksWindowController: TodayTasksWindowController?
     private var statusItem: NSStatusItem?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
         timerStore.onCompletion = { [weak self] in
             self?.showCompletionOverlay()
+        }
+        if todayTasksStore.refreshTokenAvailability() {
+            todayTasksStore.refresh()
         }
         installStatusItem()
         showPanel()
@@ -38,14 +43,22 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         if floatingPanelController == nil {
             floatingPanelController = FloatingPanelController(
                 timerStore: timerStore,
+                todayTasksStore: todayTasksStore,
                 settings: settings,
                 onTestReminder: { [weak self] in
                     self?.showCompletionOverlay()
+                },
+                onOpenTasks: { [weak self] in
+                    self?.showTodayTasksWindow()
                 },
                 onOpenSettings: { [weak self] in
                     self?.showSettingsWindow()
                 }
             )
+        }
+
+        if todayTasksStore.refreshTokenAvailability(), todayTasksStore.state == .idle {
+            todayTasksStore.refresh()
         }
 
         floatingPanelController?.presentWidget()
@@ -57,9 +70,30 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @objc
+    private func showTodayTasksWindow() {
+        if todayTasksWindowController == nil {
+            todayTasksWindowController = TodayTasksWindowController(store: todayTasksStore)
+        }
+
+        todayTasksWindowController?.present(refresh: true)
+    }
+
+    @objc
+    private func refreshTodayTasks() {
+        todayTasksStore.refresh()
+
+        if todayTasksWindowController?.window?.isVisible == true {
+            todayTasksWindowController?.present(refresh: false)
+        }
+    }
+
+    @objc
     private func showSettingsWindow() {
         if settingsWindowController == nil {
-            settingsWindowController = SettingsWindowController(settings: settings)
+            settingsWindowController = SettingsWindowController(
+                settings: settings,
+                todayTasksStore: todayTasksStore
+            )
         }
 
         settingsWindowController?.present()
@@ -110,6 +144,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let showItem = NSMenuItem(title: "重新打开", action: #selector(showPanel), keyEquivalent: "o")
         showItem.target = self
         menu.addItem(showItem)
+
+        menu.addItem(.separator())
+
+        let todayTasksItem = NSMenuItem(title: "今日任务…", action: #selector(showTodayTasksWindow), keyEquivalent: "d")
+        todayTasksItem.target = self
+        menu.addItem(todayTasksItem)
+
+        let refreshTasksItem = NSMenuItem(title: "刷新今日任务", action: #selector(refreshTodayTasks), keyEquivalent: "r")
+        refreshTasksItem.target = self
+        menu.addItem(refreshTasksItem)
+
+        menu.addItem(.separator())
 
         let testReminderItem = NSMenuItem(title: "测试强提醒", action: #selector(triggerReminderTest), keyEquivalent: "t")
         testReminderItem.target = self

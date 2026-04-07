@@ -9,7 +9,9 @@ struct WindowDragResult {
 struct FloatingWidgetRootView: View {
     @ObservedObject var timerStore: TimerStore
     @ObservedObject var settings: AppSettings
+    @ObservedObject var todayTasksStore: TodayTasksStore
     let onTestReminder: () -> Void
+    let onOpenTasks: () -> Void
     let onOpenSettings: () -> Void
     let onHoverChanged: (Bool) -> Void
     let onWindowDragFinished: (WindowDragResult) -> Void
@@ -21,35 +23,46 @@ struct FloatingWidgetRootView: View {
         )
         let dialSize = WidgetLayout.baseDialSize * settings.widgetScale
 
-        ZStack {
-            Color.clear
+        VStack(spacing: settings.showDragHandle ? (4 * settings.widgetScale) : 0) {
+            if settings.showDragHandle {
+                DragWindowHandle(onDragCompleted: onWindowDragFinished)
+                    .frame(width: 112 * settings.widgetScale, height: 20 * settings.widgetScale)
+                    .padding(.top, 4 * settings.widgetScale)
+                    .opacity(0.86)
+            }
 
-            VStack(spacing: 6) {
-                if settings.showDragHandle {
-                    DragWindowHandle(onDragCompleted: onWindowDragFinished)
-                        .frame(width: 120 * settings.widgetScale, height: 24 * settings.widgetScale)
-                        .padding(.top, 6 * settings.widgetScale)
-                        .opacity(0.9)
+            DialWidgetView(timerStore: timerStore)
+                .frame(width: dialSize, height: dialSize)
+                .contextMenu {
+                    Button("15 分钟") { timerStore.setPreset(minutes: 15) }
+                    Button("25 分钟") { timerStore.setPreset(minutes: 25) }
+                    Button("30 分钟") { timerStore.setPreset(minutes: 30) }
+                    Button("45 分钟") { timerStore.setPreset(minutes: 45) }
+                    Divider()
+                    Button("今日任务…") { onOpenTasks() }
+                    Divider()
+                    Button("设置…") { onOpenSettings() }
+                    Divider()
+                    Button("测试强提醒") { onTestReminder() }
+                    Divider()
+                    Button("重置") { timerStore.reset() }
                 }
 
-                DialWidgetView(timerStore: timerStore)
-                    .frame(width: dialSize, height: dialSize)
-                    .contextMenu {
-                        Button("15 分钟") { timerStore.setPreset(minutes: 15) }
-                        Button("25 分钟") { timerStore.setPreset(minutes: 25) }
-                        Button("30 分钟") { timerStore.setPreset(minutes: 30) }
-                        Button("45 分钟") { timerStore.setPreset(minutes: 45) }
-                        Divider()
-                        Button("设置…") { onOpenSettings() }
-                        Divider()
-                        Button("测试强提醒") { onTestReminder() }
-                        Divider()
-                        Button("重置") { timerStore.reset() }
+            if let task = todayTasksStore.primaryTask {
+                TaskBubbleView(
+                    task: task,
+                    tailEdge: .top,
+                    isCompleting: todayTasksStore.isCompleting(taskID: task.id),
+                    onComplete: {
+                        todayTasksStore.completeTask(taskID: task.id)
                     }
+                )
+                    .frame(width: min(contentSize.width * 0.92, 236))
+                    .padding(.top, -40 * settings.widgetScale)
             }
-            .padding(.vertical, 8)
-            .frame(width: contentSize.width, height: contentSize.height)
         }
+        .frame(width: contentSize.width, height: contentSize.height, alignment: .top)
+        .background(Color.clear)
         .onHover(perform: onHoverChanged)
     }
 }
