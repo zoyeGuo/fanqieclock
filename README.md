@@ -4,7 +4,7 @@ A native macOS floating pomodoro widget built with `SwiftUI + AppKit`.
 
 It stays above other windows, supports drag-to-set time on a circular dial, shows a compact transparent desktop widget, and includes a full-screen "strong reminder" overlay when a session ends.
 
-![Prototype preview](exports/bIKfR.png)
+![Prototype preview](exports/2VgXn.png)
 
 ## Features
 
@@ -46,26 +46,44 @@ Sources/fanqie/
 
 ## Run Locally
 
-### Option 1: Open in Xcode
+### Option 1: Open the macOS app project in Xcode
 
-1. Open the folder as a Swift package in Xcode.
-2. Build and run the `fanqie` executable target.
+1. Open `FanqieClock.xcodeproj` in Xcode.
+2. Select the `FanqieClock` scheme.
+3. Press `Run`.
 
-### Option 2: Run from terminal
+This path builds a standard macOS `.app` bundle, which is the recommended workflow if you want the project to behave like a normal desktop app.
 
-If your machine uses the full Xcode toolchain:
+After a successful build, the app bundle will be inside Xcode's build products, or in the custom derived data folder if you build from terminal.
+
+### Option 2: Build the `.app` from terminal
 
 ```bash
-swift build
-./.build/arm64-apple-macosx/debug/fanqie
+cd "/Users/guoziyi/Documents/New project 2/fanqie"
+env DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer \
+xcodebuild \
+  -project FanqieClock.xcodeproj \
+  -scheme FanqieClock \
+  -configuration Debug \
+  CODE_SIGNING_ALLOWED=NO \
+  -derivedDataPath ./.xcodebuild \
+  build
 ```
 
-If `swift build` is still pointing at Command Line Tools instead of full Xcode, run:
+The generated app will be at:
+
+```text
+./.xcodebuild/Build/Products/Debug/FanqieClock.app
+```
+
+### Option 3: Keep using the Swift Package executable
 
 ```bash
 DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift build
 ./.build/arm64-apple-macosx/debug/fanqie
 ```
+
+This path is still useful for quick local development, but the Xcode project is now the primary way to get a normal macOS app bundle.
 
 ## Current Interaction Model
 
@@ -76,6 +94,5 @@ DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift build
 
 ## Notes
 
-- The app is currently implemented as a native executable Swift package, not an `.xcodeproj`.
+- The repo now includes both a Swift package executable and a standard macOS Xcode app project.
 - The floating widget is tuned for desktop use and may still need further polish around hit testing and animation feel.
-

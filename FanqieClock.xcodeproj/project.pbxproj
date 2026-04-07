@@ -1,0 +1,259 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		001000000000000000000001 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 002000000000000000000001 /* AppDelegate.swift */; };
+		001000000000000000000002 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 002000000000000000000002 /* AppSettings.swift */; };
+		001000000000000000000003 /* CompletionOverlayController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 002000000000000000000003 /* CompletionOverlayController.swift */; };
+		001000000000000000000004 /* DialWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 002000000000000000000004 /* DialWidgetView.swift */; };
+		001000000000000000000005 /* FanqieApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 002000000000000000000005 /* FanqieApp.swift */; };
+		001000000000000000000006 /* FloatingPanelController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 002000000000000000000006 /* FloatingPanelController.swift */; };
+		001000000000000000000007 /* FloatingWidgetRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 002000000000000000000007 /* FloatingWidgetRootView.swift */; };
+		001000000000000000000008 /* SettingsWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 002000000000000000000008 /* SettingsWindowController.swift */; };
+		001000000000000000000009 /* TimerStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 002000000000000000000009 /* TimerStore.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		002000000000000000000001 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		002000000000000000000002 /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
+		002000000000000000000003 /* CompletionOverlayController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompletionOverlayController.swift; sourceTree = "<group>"; };
+		002000000000000000000004 /* DialWidgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DialWidgetView.swift; sourceTree = "<group>"; };
+		002000000000000000000005 /* FanqieApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FanqieApp.swift; sourceTree = "<group>"; };
+		002000000000000000000006 /* FloatingPanelController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloatingPanelController.swift; sourceTree = "<group>"; };
+		002000000000000000000007 /* FloatingWidgetRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloatingWidgetRootView.swift; sourceTree = "<group>"; };
+		002000000000000000000008 /* SettingsWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsWindowController.swift; sourceTree = "<group>"; };
+		002000000000000000000009 /* TimerStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerStore.swift; sourceTree = "<group>"; };
+		00200000000000000000000A /* FanqieClock.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FanqieClock.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		00200000000000000000000B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		003000000000000000000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		004000000000000000000001 = {
+			isa = PBXGroup;
+			children = (
+				004000000000000000000002 /* App */,
+				004000000000000000000003 /* Sources */,
+				004000000000000000000004 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		004000000000000000000002 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				00200000000000000000000B /* Info.plist */,
+			);
+			path = App;
+			sourceTree = SOURCE_ROOT;
+		};
+		004000000000000000000003 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				004000000000000000000005 /* fanqie */,
+			);
+			path = Sources;
+			sourceTree = SOURCE_ROOT;
+		};
+		004000000000000000000004 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				00200000000000000000000A /* FanqieClock.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		004000000000000000000005 /* fanqie */ = {
+			isa = PBXGroup;
+			children = (
+				002000000000000000000001 /* AppDelegate.swift */,
+				002000000000000000000002 /* AppSettings.swift */,
+				002000000000000000000003 /* CompletionOverlayController.swift */,
+				002000000000000000000004 /* DialWidgetView.swift */,
+				002000000000000000000005 /* FanqieApp.swift */,
+				002000000000000000000006 /* FloatingPanelController.swift */,
+				002000000000000000000007 /* FloatingWidgetRootView.swift */,
+				002000000000000000000008 /* SettingsWindowController.swift */,
+				002000000000000000000009 /* TimerStore.swift */,
+			);
+			path = fanqie;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		005000000000000000000001 /* FanqieClock */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 006000000000000000000001 /* Build configuration list for PBXNativeTarget "FanqieClock" */;
+			buildPhases = (
+				007000000000000000000001 /* Sources */,
+				003000000000000000000001 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = FanqieClock;
+			productName = FanqieClock;
+			productReference = 00200000000000000000000A /* FanqieClock.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		008000000000000000000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					005000000000000000000001 = {
+						CreatedOnToolsVersion = 16.0;
+					};
+				};
+			};
+			buildConfigurationList = 006000000000000000000002 /* Build configuration list for PBXProject "FanqieClock" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 004000000000000000000001;
+			productRefGroup = 004000000000000000000004 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				005000000000000000000001 /* FanqieClock */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		007000000000000000000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				001000000000000000000001 /* AppDelegate.swift in Sources */,
+				001000000000000000000002 /* AppSettings.swift in Sources */,
+				001000000000000000000003 /* CompletionOverlayController.swift in Sources */,
+				001000000000000000000004 /* DialWidgetView.swift in Sources */,
+				001000000000000000000005 /* FanqieApp.swift in Sources */,
+				001000000000000000000006 /* FloatingPanelController.swift in Sources */,
+				001000000000000000000007 /* FloatingWidgetRootView.swift in Sources */,
+				001000000000000000000008 /* SettingsWindowController.swift in Sources */,
+				001000000000000000000009 /* TimerStore.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		009000000000000000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		009000000000000000000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		009000000000000000000003 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGNING_ALLOWED = NO;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_LANGUAGE = en;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = App/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.zoye.fanqieclock;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SUPPORTED_PLATFORMS = macosx;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		009000000000000000000004 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGNING_ALLOWED = NO;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_LANGUAGE = en;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = App/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.zoye.fanqieclock;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SUPPORTED_PLATFORMS = macosx;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		006000000000000000000001 /* Build configuration list for PBXNativeTarget "FanqieClock" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				009000000000000000000003 /* Debug */,
+				009000000000000000000004 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		006000000000000000000002 /* Build configuration list for PBXProject "FanqieClock" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				009000000000000000000001 /* Debug */,
+				009000000000000000000002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 008000000000000000000001 /* Project object */;
+}
