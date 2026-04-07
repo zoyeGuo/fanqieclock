@@ -4,7 +4,7 @@ A native macOS floating pomodoro widget built with `SwiftUI + AppKit`.
 
 It stays above other windows, supports drag-to-set time on a circular dial, shows a compact transparent desktop widget, and includes a full-screen "strong reminder" overlay when a session ends.
 
-![Prototype preview](exports/2VgXn.png)
+![Prototype preview](assets/readme-preview.png)
 
 ## Features
 
@@ -59,26 +59,28 @@ Sources/fanqie/
 
 This path builds a standard macOS `.app` bundle, which is the recommended workflow if you want the project to behave like a normal desktop app.
 
-After a successful build, the app bundle will be inside Xcode's build products, or in the custom derived data folder if you build from terminal.
+After a successful build in Xcode, the app bundle will appear in Xcode's build products. If you build from terminal with the command below, the packaged app is written to the visible `dist/` folder in this repo.
 
 ### Option 2: Build the `.app` from terminal
 
 ```bash
 cd "/Users/guoziyi/Documents/New project 2/fanqie"
+mkdir -p dist
 env DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer \
 xcodebuild \
   -project FanqieClock.xcodeproj \
   -scheme FanqieClock \
-  -configuration Debug \
+  -configuration Release \
   CODE_SIGNING_ALLOWED=NO \
-  -derivedDataPath ./.xcodebuild \
+  -derivedDataPath ./.release-build \
+  CONFIGURATION_BUILD_DIR="$PWD/dist" \
   build
 ```
 
 The generated app will be at:
 
 ```text
-./.xcodebuild/Build/Products/Debug/FanqieClock.app
+./dist/FanqieClock.app
 ```
 
 ### Option 3: Keep using the Swift Package executable

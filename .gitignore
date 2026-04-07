@@ -9,4 +9,6 @@ DerivedData/
 .idea/
 .vscode/
 .xcodebuild/
+.release-build/
+/dist/
 *.xcuserstate
