@@ -1,11 +1,18 @@
 import AppKit
 import SwiftUI
 
+struct WindowDragResult {
+    let didMove: Bool
+    let finalFrame: CGRect?
+}
+
 struct FloatingWidgetRootView: View {
     @ObservedObject var timerStore: TimerStore
     @ObservedObject var settings: AppSettings
     let onTestReminder: () -> Void
     let onOpenSettings: () -> Void
+    let onHoverChanged: (Bool) -> Void
+    let onWindowDragFinished: (WindowDragResult) -> Void
 
     var body: some View {
         let contentSize = WidgetLayout.contentSize(
@@ -19,7 +26,7 @@ struct FloatingWidgetRootView: View {
 
             VStack(spacing: 6) {
                 if settings.showDragHandle {
-                    DragWindowHandle()
+                    DragWindowHandle(onDragCompleted: onWindowDragFinished)
                         .frame(width: 120 * settings.widgetScale, height: 24 * settings.widgetScale)
                         .padding(.top, 6 * settings.widgetScale)
                         .opacity(0.9)
@@ -43,19 +50,30 @@ struct FloatingWidgetRootView: View {
             .padding(.vertical, 8)
             .frame(width: contentSize.width, height: contentSize.height)
         }
+        .onHover(perform: onHoverChanged)
     }
 }
 
 private struct DragWindowHandle: NSViewRepresentable {
+    let onDragCompleted: (WindowDragResult) -> Void
+
     func makeNSView(context: Context) -> DragHandleNSView {
-        DragHandleNSView()
+        let view = DragHandleNSView()
+        view.onDragCompleted = onDragCompleted
+        return view
     }
 
-    func updateNSView(_ nsView: DragHandleNSView, context: Context) {}
+    func updateNSView(_ nsView: DragHandleNSView, context: Context) {
+        nsView.onDragCompleted = onDragCompleted
+    }
 }
 
 private final class DragHandleNSView: NSView {
     private let indicatorLayer = CALayer()
+    var onDragCompleted: (WindowDragResult) -> Void = { _ in }
+    private var dragStartMouseLocation: CGPoint?
+    private var dragStartWindowOrigin: CGPoint?
+    private var hasDraggedWindow = false
 
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
@@ -93,6 +111,46 @@ private final class DragHandleNSView: NSView {
     }
 
     override func mouseDown(with event: NSEvent) {
-        window?.performDrag(with: event)
+        dragStartMouseLocation = NSEvent.mouseLocation
+        dragStartWindowOrigin = window?.frame.origin
+        hasDraggedWindow = false
+    }
+
+    override func mouseDragged(with event: NSEvent) {
+        guard
+            let dragStartMouseLocation,
+            let dragStartWindowOrigin,
+            let window
+        else {
+            return
+        }
+
+        let currentMouseLocation = NSEvent.mouseLocation
+        let deltaX = currentMouseLocation.x - dragStartMouseLocation.x
+        let deltaY = currentMouseLocation.y - dragStartMouseLocation.y
+        let movedDistance = hypot(deltaX, deltaY)
+
+        if movedDistance >= 2 {
+            hasDraggedWindow = true
+        }
+
+        let newOrigin = NSPoint(
+            x: dragStartWindowOrigin.x + deltaX,
+            y: dragStartWindowOrigin.y + deltaY
+        )
+        window.setFrameOrigin(newOrigin)
+    }
+
+    override func mouseUp(with event: NSEvent) {
+        onDragCompleted(
+            WindowDragResult(
+                didMove: hasDraggedWindow,
+                finalFrame: window?.frame
+            )
+        )
+
+        dragStartMouseLocation = nil
+        dragStartWindowOrigin = nil
+        hasDraggedWindow = false
     }
 }

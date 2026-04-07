@@ -30,12 +30,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             return
         }
 
-        if controller.panel.isVisible {
-            controller.panel.orderOut(nil)
-        } else {
-            controller.showWindow(nil)
-            controller.panel.orderFrontRegardless()
-        }
+        controller.toggleWidgetVisibility()
     }
 
     @objc
@@ -53,8 +48,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             )
         }
 
-        floatingPanelController?.showWindow(nil)
-        floatingPanelController?.panel.orderFrontRegardless()
+        floatingPanelController?.presentWidget()
     }
 
     @objc
