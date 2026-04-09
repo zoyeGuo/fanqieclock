@@ -1,37 +1,53 @@
-# fanqieclock
+# FanqieClock
 
-A native macOS floating pomodoro widget built with `SwiftUI + AppKit`.
+一个原生 macOS 的顶部刘海专注岛，参考了 Nook X 一类的交互形态，目前先聚焦两件事：
 
-It stays above other windows, supports drag-to-set time on a circular dial, shows a compact transparent desktop widget, and includes a full-screen "strong reminder" overlay when a session ends.
+- 番茄钟
+- Todoist 今日任务
 
-![Prototype preview](assets/readme-preview.png)
+项目使用 `SwiftUI + AppKit` 构建，主屏会尽量贴合真实刘海，副屏或无刘海屏幕会自动生成模拟刘海，并共享同一套番茄与任务状态。
 
-## Features
+## 当前能力
 
-- Native macOS floating widget using `NSPanel`
-- Transparent compact desktop-style UI
-- Drag the outer ring to set the timer
-- Click the cat face to start or pause
-- Countdown pointer moves back to zero as time decreases
-- Full-screen strong reminder overlay when focus ends
-- Read today's tasks from Todoist
-- Menu bar access and quick actions
-- Persistent settings window for:
-  - default focus duration
-  - widget scale
-  - strong reminder toggle
-  - reminder sound toggle
-  - drag handle visibility
-  - Todoist token setup hints
+- 顶部刘海式收起 / 展开交互
+- 主屏真实刘海贴合，副屏自动模拟刘海
+- 三栏展开布局：
+  - 今日任务
+  - 专注统计
+  - 番茄钟
+- 番茄钟外环拖拽设时
+- 点击中心开始 / 暂停
+- Todoist `today` 任务读取
+- 在任务列表中直接勾选完成 Todoist 任务
+- 今日 / 本周专注统计持久化
+- 可选强提醒和提醒声音
+- Swift Package 可执行程序与 Xcode `.app` 两种运行方式
 
-## Tech Stack
+## 当前交互
+
+- 收起态：
+  - 在有刘海的屏幕上尽量与系统刘海重合
+  - 在无刘海屏幕上显示模拟刘海
+- 展开态：
+  - 鼠标移入刘海区域展开
+  - 鼠标移出后自动回收
+  - 三个小组件保持统一高度
+- 番茄钟：
+  - 拖动外环设定时长
+  - 点击中心开始或暂停
+- 今日任务：
+  - 支持滚动查看全部任务
+  - 点击勾选可直接调用 Todoist API 完成任务
+
+## 技术栈
 
 - Swift 6
 - SwiftUI
 - AppKit
 - Swift Package Manager
+- Xcode project
 
-## Project Structure
+## 项目结构
 
 ```text
 Sources/fanqie/
@@ -39,9 +55,11 @@ Sources/fanqie/
   AppSettings.swift
   CompletionOverlayController.swift
   DialWidgetView.swift
+  DisplayMetrics.swift
   FanqieApp.swift
   FloatingPanelController.swift
   FloatingWidgetRootView.swift
+  FocusStatsStore.swift
   SettingsWindowController.swift
   TodayTasksStore.swift
   TodayTasksWindowController.swift
@@ -49,19 +67,33 @@ Sources/fanqie/
   TodoistClient.swift
 ```
 
-## Run Locally
+## 本地运行
 
-### Option 1: Open the macOS app project in Xcode
+### 方式 1：终端直接运行 Swift Package
 
-1. Open `FanqieClock.xcodeproj` in Xcode.
-2. Select the `FanqieClock` scheme.
-3. Press `Run`.
+适合日常快速调 UI。
 
-This path builds a standard macOS `.app` bundle, which is the recommended workflow if you want the project to behave like a normal desktop app.
+```bash
+cd "/Users/guoziyi/Documents/New project 2/fanqie"
+env DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer \
+CLANG_MODULE_CACHE_PATH="$PWD/.build/ModuleCache" \
+SWIFTPM_MODULECACHE_OVERRIDE="$PWD/.build/ModuleCache" \
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swift build
 
-After a successful build in Xcode, the app bundle will appear in Xcode's build products. If you build from terminal with the command below, the packaged app is written to the visible `dist/` folder in this repo.
+./.build/arm64-apple-macosx/debug/fanqie
+```
 
-### Option 2: Build the `.app` from terminal
+### 方式 2：Xcode 运行 `.app`
+
+```text
+FanqieClock.xcodeproj
+```
+
+1. 用 Xcode 打开 `FanqieClock.xcodeproj`
+2. 选择 `FanqieClock` scheme
+3. 点击 `Run`
+
+### 方式 3：终端打包可见目录下的 `.app`
 
 ```bash
 cd "/Users/guoziyi/Documents/New project 2/fanqie"
@@ -77,54 +109,46 @@ xcodebuild \
   build
 ```
 
-The generated app will be at:
+生成后的应用位于：
 
 ```text
-./dist/FanqieClock.app
+dist/FanqieClock.app
 ```
 
-### Option 3: Keep using the Swift Package executable
+## Todoist 配置
 
-```bash
-DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift build
-./.build/arm64-apple-macosx/debug/fanqie
-```
+项目通过环境变量 `TODOIST_API_TOKEN` 读取 Todoist token。
 
-This path is still useful for quick local development, but the Xcode project is now the primary way to get a normal macOS app bundle.
-
-## Todoist Setup
-
-The app reads your daily tasks from Todoist using the `today` filter and the `TODOIST_API_TOKEN` environment variable.
-
-### If you run the Swift executable from Terminal
+### 终端运行时
 
 ```bash
 export TODOIST_API_TOKEN="your_todoist_token"
-./.build/arm64-apple-macosx/debug/fanqie
 ```
 
-### If you launch the macOS app bundle like a normal desktop app
+### 从桌面直接打开 `.app` 时
 
 ```bash
 launchctl setenv TODOIST_API_TOKEN "your_todoist_token"
 ```
 
-Then fully quit and relaunch `FanqieClock.app`.
+然后完全退出 `FanqieClock.app` 再重新打开。
 
-To clear it later:
+如果要清掉：
 
 ```bash
 launchctl unsetenv TODOIST_API_TOKEN
 ```
 
-## Current Interaction Model
+## 现在这个版本更适合什么
 
-- Drag the outer ring clockwise to set the duration
-- Click the cat face to start or pause
-- Right click the widget for presets, settings, reset, and reminder testing
-- Use the menu bar item `番茄` to reopen the widget, open settings, or inspect today's Todoist tasks
+- 想把番茄钟和 Todoist 放到顶部常驻区域
+- 主屏和副屏都希望有一致的“灵动岛”体验
+- 希望在一个界面里同时看到：
+  - 今日任务
+  - 专注统计
+  - 当前番茄状态
 
-## Notes
+## 说明
 
-- The repo now includes both a Swift package executable and a standard macOS Xcode app project.
-- The floating widget is tuned for desktop use and may still need further polish around hit testing and animation feel.
+- 当前版本已经从最早的桌面悬浮挂件，演进为顶部刘海式交互形态。
+- 动画和视觉细节还在继续打磨中，但整体交互、任务联动和专注统计已经可用。
