@@ -2,30 +2,108 @@ import AppKit
 import SwiftUI
 
 enum WidgetLayout {
-    static let baseWidth: CGFloat = 282
-    static let baseHeightWithHandle: CGFloat = 424
-    static let baseHeightWithoutHandle: CGFloat = 396
-    static let baseDialSize: CGFloat = 272
+    static let fallbackCompactBaseSize = CGSize(width: 290, height: 52)
+    static let fallbackExpandedBaseSize = CGSize(width: 620, height: 248)
 
     static func contentSize(scale: Double, showDragHandle: Bool) -> CGSize {
-        CGSize(
-            width: baseWidth * scale,
-            height: (showDragHandle ? baseHeightWithHandle : baseHeightWithoutHandle) * scale
-        )
+        panelSize(scale: scale, isExpanded: false, notchMetrics: .none)
     }
 
     static func panelSize(scale: Double, showDragHandle: Bool) -> CGSize {
-        contentSize(scale: scale, showDragHandle: showDragHandle)
+        panelSize(scale: scale, isExpanded: false, notchMetrics: .none)
+    }
+
+    static func compactBaseSize(for notchMetrics: NotchMetrics) -> CGSize {
+        guard notchMetrics.hasNotch else {
+            return fallbackCompactBaseSize
+        }
+
+        return CGSize(
+            width: max(180, min(320, notchMetrics.width)),
+            height: max(30, min(42, notchMetrics.height))
+        )
+    }
+
+    static func expandedBaseSize(for notchMetrics: NotchMetrics) -> CGSize {
+        guard notchMetrics.hasNotch else {
+            return fallbackExpandedBaseSize
+        }
+
+        let compactSize = compactBaseSize(for: notchMetrics)
+        return CGSize(
+            width: max(940, min(1240, compactSize.width + 860)),
+            height: max(338, min(418, compactSize.height + 318))
+        )
+    }
+
+    static func panelSize(scale: Double, isExpanded: Bool, notchMetrics: NotchMetrics) -> CGSize {
+        let baseSize = isExpanded ? expandedBaseSize(for: notchMetrics) : compactBaseSize(for: notchMetrics)
+        return CGSize(width: baseSize.width * scale, height: baseSize.height * scale)
+    }
+
+    static func moduleCardHeight(for notchMetrics: NotchMetrics, scale: Double) -> CGFloat {
+        let expandedHeight = expandedBaseSize(for: notchMetrics).height * scale
+        return max(256 * scale, expandedHeight - (70 * scale))
+    }
+
+    static func taskViewportHeight(for notchMetrics: NotchMetrics, scale: Double) -> CGFloat {
+        let cardHeight = moduleCardHeight(for: notchMetrics, scale: scale)
+        return max(132 * scale, cardHeight - (112 * scale))
+    }
+
+    static func taskContentScale(for notchMetrics: NotchMetrics, scale: Double) -> CGFloat {
+        let cardHeight = moduleCardHeight(for: notchMetrics, scale: scale)
+        let baseline = 264 * scale
+        return max(1.0, min(1.12, cardHeight / max(baseline, 1)))
+    }
+
+    static func statsContentScale(for notchMetrics: NotchMetrics, scale: Double) -> CGFloat {
+        let cardHeight = moduleCardHeight(for: notchMetrics, scale: scale)
+        let baseline = 264 * scale
+        return max(1.0, min(1.10, cardHeight / max(baseline, 1)))
+    }
+
+    static func overviewModuleWidth(for notchMetrics: NotchMetrics, scale: Double) -> CGFloat {
+        let expandedWidth = expandedBaseSize(for: notchMetrics).width * scale
+        let available = expandedWidth - (32 * scale) - (24 * scale)
+        return max(360 * scale, min(480 * scale, available * 0.38))
+    }
+
+    static func statsModuleWidth(for notchMetrics: NotchMetrics, scale: Double) -> CGFloat {
+        let expandedWidth = expandedBaseSize(for: notchMetrics).width * scale
+        let available = expandedWidth - (32 * scale) - (24 * scale)
+        return max(240 * scale, min(300 * scale, available * 0.21))
+    }
+
+    static func focusModuleWidth(for notchMetrics: NotchMetrics, scale: Double) -> CGFloat {
+        let expandedWidth = expandedBaseSize(for: notchMetrics).width * scale
+        let available = expandedWidth - (32 * scale) - (24 * scale)
+        let overview = overviewModuleWidth(for: notchMetrics, scale: scale)
+        let stats = statsModuleWidth(for: notchMetrics, scale: scale)
+        return max(360 * scale, available - overview - stats)
+    }
+
+    static func focusModuleDialSize(for notchMetrics: NotchMetrics, scale: Double) -> CGFloat {
+        let focusWidth = focusModuleWidth(for: notchMetrics, scale: scale)
+        let widthBound = max(188 * scale, min(236 * scale, focusWidth - (68 * scale)))
+        let heightBound = max(176 * scale, moduleCardHeight(for: notchMetrics, scale: scale) - (68 * scale))
+        return min(widthBound, heightBound)
     }
 }
 
 @MainActor
 final class SettingsWindowController: NSWindowController {
     private let todayTasksStore: TodayTasksStore
+    private let focusStatsStore: FocusStatsStore
 
-    init(settings: AppSettings, todayTasksStore: TodayTasksStore) {
+    init(settings: AppSettings, todayTasksStore: TodayTasksStore, focusStatsStore: FocusStatsStore) {
         self.todayTasksStore = todayTasksStore
-        let rootView = SettingsRootView(settings: settings, todayTasksStore: todayTasksStore)
+        self.focusStatsStore = focusStatsStore
+        let rootView = SettingsRootView(
+            settings: settings,
+            todayTasksStore: todayTasksStore,
+            focusStatsStore: focusStatsStore
+        )
         let hostingView = NSHostingView(rootView: rootView)
 
         let window = NSWindow(
@@ -62,6 +140,7 @@ final class SettingsWindowController: NSWindowController {
 struct SettingsRootView: View {
     @ObservedObject var settings: AppSettings
     @ObservedObject var todayTasksStore: TodayTasksStore
+    @ObservedObject var focusStatsStore: FocusStatsStore
     private let todoistEnvKey = TodoistClient.tokenEnvironmentKey
 
     var body: some View {
@@ -83,7 +162,7 @@ struct SettingsRootView: View {
                             .font(.system(size: 32, weight: .heavy, design: .rounded))
                             .foregroundStyle(.white)
 
-                        Text("这里控制默认时长、悬浮组件大小和提醒方式，改完会立即生效。")
+                        Text("这里控制默认时长、顶部灵动岛大小和提醒方式，改完会立即生效。")
                             .font(.system(size: 14, weight: .medium, design: .rounded))
                             .foregroundStyle(.white.opacity(0.72))
                     }
@@ -103,10 +182,10 @@ struct SettingsRootView: View {
                         }
                     }
 
-                    SettingsCard(title: "外观", subtitle: "组件大小会立即同步到桌面悬浮表盘。") {
+                    SettingsCard(title: "外观", subtitle: "灵动岛大小会立即同步到顶部界面。") {
                         VStack(alignment: .leading, spacing: 12) {
                             HStack {
-                                Text("组件大小")
+                                Text("灵动岛大小")
                                 Spacer()
                                 Text("\(Int((settings.widgetScale * 100).rounded()))%")
                                     .font(.system(size: 14, weight: .bold, design: .rounded))
@@ -115,9 +194,6 @@ struct SettingsRootView: View {
 
                             Slider(value: $settings.widgetScale, in: 0.8 ... 1.3, step: 0.05)
                                 .tint(.cyan)
-
-                            Toggle("显示顶部拖动条", isOn: $settings.showDragHandle)
-                                .toggleStyle(.switch)
                         }
                     }
 
@@ -129,6 +205,10 @@ struct SettingsRootView: View {
                             Toggle("播放提醒声音", isOn: $settings.playReminderSound)
                                 .toggleStyle(.switch)
                         }
+                    }
+
+                    SettingsCard(title: "专注统计", subtitle: "完成一轮番茄后会自动计入今日和本周统计。") {
+                        FocusStatsSettingsSection(store: focusStatsStore)
                     }
 
                     SettingsCard(title: "Todoist", subtitle: "今日任务会通过环境变量读取你的 Todoist Token。") {
@@ -244,6 +324,73 @@ private struct TodayTasksOrderingSection: View {
                 }
             }
         }
+    }
+}
+
+private struct FocusStatsSettingsSection: View {
+    @ObservedObject var store: FocusStatsStore
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 10) {
+                SettingsStatPill(
+                    title: "今日",
+                    value: store.formattedDuration(for: store.todaySummary),
+                    subtitle: "\(store.todaySummary.sessionCount) 轮"
+                )
+                SettingsStatPill(
+                    title: "本周",
+                    value: store.formattedDuration(for: store.weekSummary),
+                    subtitle: "\(store.weekSummary.sessionCount) 轮"
+                )
+            }
+
+            HStack {
+                Text("累计记录 \(store.records.count) 条完成番茄。")
+                    .font(.system(size: 12, weight: .medium, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.60))
+
+                Spacer()
+
+                Button("清空统计") {
+                    store.clearHistory()
+                }
+                .buttonStyle(SettingsSecondaryButtonStyle())
+            }
+        }
+    }
+}
+
+private struct SettingsStatPill: View {
+    let title: String
+    let value: String
+    let subtitle: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 5) {
+            Text(title)
+                .font(.system(size: 11, weight: .bold, design: .rounded))
+                .foregroundStyle(.white.opacity(0.54))
+
+            Text(value)
+                .font(.system(size: 17, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white.opacity(0.96))
+
+            Text(subtitle)
+                .font(.system(size: 11, weight: .medium, design: .rounded))
+                .foregroundStyle(.white.opacity(0.46))
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
+        .background(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(.white.opacity(0.05))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .strokeBorder(.white.opacity(0.06), lineWidth: 1)
+                )
+        )
     }
 }
 

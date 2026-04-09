@@ -27,6 +27,7 @@ enum TodoistClientError: LocalizedError {
     case unauthorized
     case invalidResponse
     case unexpectedStatus(Int)
+    case serverMessage(String)
     case decodingFailed
 
     var errorDescription: String? {
@@ -39,6 +40,8 @@ enum TodoistClientError: LocalizedError {
             return "Todoist 返回了无法识别的响应。"
         case let .unexpectedStatus(statusCode):
             return "Todoist 请求失败，状态码 \(statusCode)。"
+        case let .serverMessage(message):
+            return message
         case .decodingFailed:
             return "Todoist 数据解析失败。"
         }
@@ -107,18 +110,21 @@ struct TodoistClient {
         }
 
         let request = try makeCloseTaskRequest(taskID: taskID, token: token)
-        let (_, response) = try await session.data(for: request)
+        let (data, response) = try await session.data(for: request)
 
         guard let httpResponse = response as? HTTPURLResponse else {
             throw TodoistClientError.invalidResponse
         }
 
         switch httpResponse.statusCode {
-        case 204:
+        case 200, 204:
             return
         case 401:
             throw TodoistClientError.unauthorized
         default:
+            if let message = decodedServerMessage(from: data) {
+                throw TodoistClientError.serverMessage(message)
+            }
             throw TodoistClientError.unexpectedStatus(httpResponse.statusCode)
         }
     }
@@ -149,7 +155,7 @@ struct TodoistClient {
 
     private func makeCloseTaskRequest(taskID: String, token: String) throws -> URLRequest {
         guard let encodedTaskID = taskID.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed),
-              let url = URL(string: "https://api.todoist.com/rest/v2/tasks/\(encodedTaskID)/close")
+              let url = URL(string: "https://api.todoist.com/api/v1/tasks/\(encodedTaskID)/close")
         else {
             throw TodoistClientError.invalidResponse
         }
@@ -157,9 +163,33 @@ struct TodoistClient {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
         request.setValue(UUID().uuidString, forHTTPHeaderField: "X-Request-Id")
         request.timeoutInterval = 20
         return request
+    }
+
+    private func decodedServerMessage(from data: Data) -> String? {
+        guard !data.isEmpty else { return nil }
+
+        if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+            if let error = json["error"] as? String, !error.isEmpty {
+                return error
+            }
+
+            if let message = json["message"] as? String, !message.isEmpty {
+                return message
+            }
+        }
+
+        guard let rawText = String(data: data, encoding: .utf8)?
+            .trimmingCharacters(in: .whitespacesAndNewlines),
+              !rawText.isEmpty
+        else {
+            return nil
+        }
+
+        return rawText
     }
 
     private func sortTasks(_ tasks: [TodoistTask]) -> [TodoistTask] {

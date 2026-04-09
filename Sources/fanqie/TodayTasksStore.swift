@@ -134,7 +134,8 @@ final class TodayTasksStore: ObservableObject {
 
         do {
             try await client.closeTask(taskID: taskID)
-            tasks.removeAll { $0.id == taskID }
+            let refreshedTasks = try await client.fetchTodayTasks()
+            tasks = applyPersistedOrder(to: refreshedTasks)
             lastUpdatedAt = Date()
             state = tasks.isEmpty ? .empty : .loaded
             persistCurrentOrder()

@@ -19,6 +19,7 @@ final class TimerStore: ObservableObject {
     @Published private(set) var status: Status = .idle
 
     var onCompletion: (() -> Void)?
+    var onSessionCompleted: ((TimeInterval) -> Void)?
 
     private var timer: Timer?
     private var lastTick = Date()
@@ -155,6 +156,7 @@ final class TimerStore: ObservableObject {
         stopTimer()
         remainingTime = 0
         status = .completed
+        onSessionCompleted?(selectedDuration)
         onCompletion?()
     }
 

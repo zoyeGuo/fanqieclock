@@ -6,7 +6,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let settings = AppSettings.shared
     private lazy var timerStore = TimerStore(settings: settings)
     private let todayTasksStore = TodayTasksStore.shared
-    private var floatingPanelController: FloatingPanelController?
+    private let focusStatsStore = FocusStatsStore.shared
+    private var floatingPanelControllers: [NSNumber: FloatingPanelController] = [:]
     private var completionOverlayController: CompletionOverlayController?
     private var settingsWindowController: SettingsWindowController?
     private var todayTasksWindowController: TodayTasksWindowController?
@@ -14,12 +15,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
+        timerStore.onSessionCompleted = { [weak self] duration in
+            self?.focusStatsStore.recordCompletedSession(duration: duration)
+        }
         timerStore.onCompletion = { [weak self] in
             self?.showCompletionOverlay()
         }
         if todayTasksStore.refreshTokenAvailability() {
             todayTasksStore.refresh()
         }
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleScreenParametersChanged),
+            name: NSApplication.didChangeScreenParametersNotification,
+            object: nil
+        )
         installStatusItem()
         showPanel()
     }
@@ -30,38 +40,34 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     @objc
     private func togglePanel() {
-        guard let controller = floatingPanelController else {
+        guard !floatingPanelControllers.isEmpty else {
             showPanel()
             return
         }
 
-        controller.toggleWidgetVisibility()
+        let anyVisible = floatingPanelControllers.values.contains(where: \.isVisible)
+        if anyVisible {
+            floatingPanelControllers.values.forEach { $0.hideWidget() }
+        } else {
+            showPanel()
+        }
     }
 
     @objc
     private func showPanel() {
-        if floatingPanelController == nil {
-            floatingPanelController = FloatingPanelController(
-                timerStore: timerStore,
-                todayTasksStore: todayTasksStore,
-                settings: settings,
-                onTestReminder: { [weak self] in
-                    self?.showCompletionOverlay()
-                },
-                onOpenTasks: { [weak self] in
-                    self?.showTodayTasksWindow()
-                },
-                onOpenSettings: { [weak self] in
-                    self?.showSettingsWindow()
-                }
-            )
-        }
+        syncFloatingPanels()
 
         if todayTasksStore.refreshTokenAvailability(), todayTasksStore.state == .idle {
             todayTasksStore.refresh()
         }
 
-        floatingPanelController?.presentWidget()
+        floatingPanelControllers.values.forEach { $0.presentWidget() }
+    }
+
+    @objc
+    private func handleScreenParametersChanged() {
+        syncFloatingPanels()
+        floatingPanelControllers.values.forEach { $0.presentWidget() }
     }
 
     @objc
@@ -92,7 +98,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         if settingsWindowController == nil {
             settingsWindowController = SettingsWindowController(
                 settings: settings,
-                todayTasksStore: todayTasksStore
+                todayTasksStore: todayTasksStore,
+                focusStatsStore: focusStatsStore
             )
         }
 
@@ -172,5 +179,35 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         item.menu = menu
         statusItem = item
+    }
+
+    private func syncFloatingPanels() {
+        let currentScreens = NSScreen.screens.compactMap(\.displayID)
+        let currentScreenSet = Set(currentScreens)
+
+        let staleScreenIDs = floatingPanelControllers.keys.filter { !currentScreenSet.contains($0) }
+        for screenID in staleScreenIDs {
+            floatingPanelControllers[screenID]?.dispose()
+            floatingPanelControllers.removeValue(forKey: screenID)
+        }
+
+        for screenID in currentScreens where floatingPanelControllers[screenID] == nil {
+            floatingPanelControllers[screenID] = FloatingPanelController(
+                screenID: screenID,
+                timerStore: timerStore,
+                todayTasksStore: todayTasksStore,
+                focusStatsStore: focusStatsStore,
+                settings: settings,
+                onTestReminder: { [weak self] in
+                    self?.showCompletionOverlay()
+                },
+                onOpenTasks: { [weak self] in
+                    self?.showTodayTasksWindow()
+                },
+                onOpenSettings: { [weak self] in
+                    self?.showSettingsWindow()
+                }
+            )
+        }
     }
 }

@@ -19,6 +19,8 @@
 		00100000000000000000000A /* TodoistClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00200000000000000000000C /* TodoistClient.swift */; };
 		00100000000000000000000B /* TodayTasksStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00200000000000000000000D /* TodayTasksStore.swift */; };
 		00100000000000000000000C /* TodayTasksWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00200000000000000000000E /* TodayTasksWindowController.swift */; };
+		00100000000000000000000D /* DisplayMetrics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00200000000000000000000F /* DisplayMetrics.swift */; };
+		00100000000000000000000E /* FocusStatsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 002000000000000000000010 /* FocusStatsStore.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -36,6 +38,8 @@
 		00200000000000000000000C /* TodoistClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoistClient.swift; sourceTree = "<group>"; };
 		00200000000000000000000D /* TodayTasksStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayTasksStore.swift; sourceTree = "<group>"; };
 		00200000000000000000000E /* TodayTasksWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayTasksWindowController.swift; sourceTree = "<group>"; };
+		00200000000000000000000F /* DisplayMetrics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayMetrics.swift; sourceTree = "<group>"; };
+		002000000000000000000010 /* FocusStatsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusStatsStore.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -97,6 +101,8 @@
 				00200000000000000000000C /* TodoistClient.swift */,
 				00200000000000000000000D /* TodayTasksStore.swift */,
 				00200000000000000000000E /* TodayTasksWindowController.swift */,
+				00200000000000000000000F /* DisplayMetrics.swift */,
+				002000000000000000000010 /* FocusStatsStore.swift */,
 			);
 			path = fanqie;
 			sourceTree = "<group>";
@@ -169,6 +175,8 @@
 				00100000000000000000000A /* TodoistClient.swift in Sources */,
 				00100000000000000000000B /* TodayTasksStore.swift in Sources */,
 				00100000000000000000000C /* TodayTasksWindowController.swift in Sources */,
+				00100000000000000000000D /* DisplayMetrics.swift in Sources */,
+				00100000000000000000000E /* FocusStatsStore.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
