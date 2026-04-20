@@ -152,3 +152,7 @@ launchctl unsetenv TODOIST_API_TOKEN
 
 - 当前版本已经从最早的桌面悬浮挂件，演进为顶部刘海式交互形态。
 - 动画和视觉细节还在继续打磨中，但整体交互、任务联动和专注统计已经可用。
+
+## License
+
+本项目当前使用 `GPL-3.0` 开源协议，完整文本见 [LICENSE](/Users/guoziyi/Documents/New%20project%202/fanqie/LICENSE)。
